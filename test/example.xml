@@ -1,0 +1,6 @@
+<nject>
+    <bean id="animal" class="com.elgoooog.nject.example.Animal">
+        <property name="name" value="bob"/>
+        <constructor-arg name="species" value="cat"/>
+    </bean>
+</nject>
