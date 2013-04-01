@@ -3,10 +3,12 @@ package com.elgoooog.nject.parser
 import io.Source
 import java.io.File
 import xml.pull.{EvElemEnd, EvElemStart, XMLEventReader}
-import com.elgoooog.nject.{BeanBuilder, Bean, BeanContainer}
+import com.elgoooog.nject._
 import compat.Platform
 import xml.MetaData
 import collection.mutable
+import xml.pull.EvElemStart
+import xml.pull.EvElemEnd
 
 /**
  * @author Nicholas Hauschild
@@ -14,22 +16,22 @@ import collection.mutable
  * Time: 11:57 PM
  */
 class NjectParser {
-  def parse(file:String):BeanContainer = {
+  def parse(file : String) : BeanContainer = {
     parse(new File(file))
   }
 
-  def parse(file:File):BeanContainer = {
+  def parse(file : File) : BeanContainer = {
     parse(Source.fromFile(file))
   }
 
-  def parse(file:Source):BeanContainer = {
+  def parse(file : Source) : BeanContainer = {
     val reader = new XMLEventReader(file)
     val beans = new scala.collection.mutable.HashSet[Bean]
 
     verifyRootElement(reader)
-    var beanBuilder:BeanBuilder = null
-    var props:mutable.Map[String, Class[_]] = null
-    var constructorArgs:mutable.MutableList[Class[_]] = null
+    var beanBuilder : BeanBuilder = null
+    var props : mutable.Map[String, DataHolder] = null
+    var constructorArgs : mutable.MutableList[DataHolder] = null
 
     while(reader.hasNext) {
       val event = reader.next()
@@ -40,16 +42,19 @@ class NjectParser {
           val id = attrs.head("id").text
           val clazz = Platform.getClassForName(className)
 
-          props = new mutable.HashMap[String, Class[_]]
-          constructorArgs = new mutable.MutableList[Class[_]]
+          props = new mutable.HashMap[String, DataHolder]
+          constructorArgs = new mutable.MutableList[DataHolder]
 
           beanBuilder.withId(id).withClass(clazz)
         }
         case EvElemStart(_,"property",attrs,_) => {
-          validateElement(attrs)
+          val dataHolder = validateElement(attrs)
+          val propName = validatePropName(attrs)
+          props.put(propName, dataHolder)
         }
         case EvElemStart(_,"constructor-arg",attrs,_) => {
-          validateElement(attrs)
+          val dataHolder = validateElement(attrs)
+          constructorArgs += dataHolder
         }
         case EvElemEnd(_,"bean") => {
           beanBuilder.withConstructorArgs(constructorArgs.toList)
@@ -63,13 +68,33 @@ class NjectParser {
     new BeanContainer(beans.toSet)
   }
 
-  def validateElement(data: MetaData) {
+  def validateElement(data : MetaData) : DataHolder = {
     val value = data.head("value")
     val ref = data.head("ref")
-    assert((value != null && ref == null) || (value == null && ref != null))
+    if (value != null && value.text != null) {
+      assert(ref == null)
+      new ValueHolder(value.text)
+    }
+    else if (ref != null && ref.text != null) {
+      assert(value == null)
+      new RefHolder(ref.text)
+    }
+    else {
+      throw new IllegalArgumentException("ref/value conflict")
+    }
   }
 
-  private def verifyRootElement(reader:XMLEventReader) {
+  def validatePropName(data : MetaData) : String = {
+    val name = data.head("name")
+    if (name != null && name.text != null) {
+      name.text
+    }
+    else {
+      throw new IllegalArgumentException("prop name missing")
+    }
+  }
+
+  private def verifyRootElement(reader : XMLEventReader) {
     assert(reader.hasNext)
     val event = reader.next()
     event match {

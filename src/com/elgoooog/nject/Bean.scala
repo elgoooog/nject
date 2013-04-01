@@ -5,7 +5,7 @@ package com.elgoooog.nject
  * Date: 3/27/13
  * Time: 10:49 PM
  */
-class Bean(_id:String, _clazz:Class[_], _constructorArgs:List[Class[_]], _properties:Map[String,Class[_]]) {
+class Bean(_id:String, _clazz:Class[_], _constructorArgs:List[DataHolder], _properties:Map[String,DataHolder]) {
   val id = _id
   val clazz = _clazz
   val constructorArgs = _constructorArgs

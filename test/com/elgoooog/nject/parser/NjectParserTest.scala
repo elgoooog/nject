@@ -17,8 +17,17 @@ class NjectParserTest extends FunSuite with BeforeAndAfter {
   test("nject parser") {
     val beans = parser.parse("test/example.xml")
 
-    for(bean <- beans.beans) {
+    for (bean <- beans.beans) {
       println(bean.id)
+      println(bean.clazz.toString)
+      println("\tprops")
+      for (prop <- bean.properties) {
+        println("\t\t" + prop._1 + " : " + prop._2.toString)
+      }
+      println("\tconstructor-args")
+      for (arg <- bean.constructorArgs) {
+        println("\t\t" + arg.toString)
+      }
     }
   }
 }

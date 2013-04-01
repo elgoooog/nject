@@ -8,8 +8,8 @@ package com.elgoooog.nject
 class BeanBuilder {
   var id:String = _
   var clazz:Class[_] = _
-  var constructorArgs:List[Class[_]] = _
-  var properties:Map[String,Class[_]] = _
+  var constructorArgs:List[DataHolder] = _
+  var properties:Map[String,DataHolder] = _
 
   def withId(_id:String):BeanBuilder = {
     id = _id
@@ -25,12 +25,12 @@ class BeanBuilder {
     this
   }
 
-  def withConstructorArgs(_constructorArgs:List[Class[_]]):BeanBuilder = {
+  def withConstructorArgs(_constructorArgs:List[DataHolder]):BeanBuilder = {
     constructorArgs = _constructorArgs
     this
   }
 
-  def withProperties(_properties:Map[String,Class[_]]):BeanBuilder = {
+  def withProperties(_properties:Map[String,DataHolder]):BeanBuilder = {
     properties = _properties
     this
   }

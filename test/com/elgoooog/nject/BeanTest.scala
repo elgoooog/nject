@@ -3,6 +3,7 @@ package com.elgoooog.nject
 import example.Animal
 import org.scalatest.FunSuite
 import collection.mutable.HashMap
+import collection.mutable
 
 /**
  * @author Nicholas Hauschild
@@ -20,9 +21,9 @@ class BeanTest extends FunSuite {
   }
 
   test("Less simple bean creation") {
-    val props = new HashMap[String,Class[_]]
-    props.put("name", classOf[String])
-    props.put("species", classOf[String])
+    val props = new mutable.HashMap[String,DataHolder]
+    props.put("name", new RefHolder("hi"))
+    props.put("species", new ValueHolder("hola"))
     val bean = new Bean("bbb", classOf[Animal], List.empty, props.toMap)
 
     assert("bbb" == bean.id)
